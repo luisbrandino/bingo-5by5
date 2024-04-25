@@ -36,6 +36,17 @@ bool contains(int[] vector, int value)
 }
 
 /**
+ *  Returns the index of the chosen element
+ *  
+ *  @param int[] vector
+ *  @return int the chosen element
+ */
+int choose(int[] vector)
+{
+    return new Random().Next(0, vector.Length);
+}
+
+/**
  *  Verifies if there's any possible numbers left to be drawn
  *
  *  @return bool true if exists, false if not
@@ -61,7 +72,7 @@ int drawNextPossibleNumber()
 
     while (true)
     {
-        int index = new Random().Next(0, possibleNumbers.Length);
+        int index = choose(possibleNumbers);
 
         if (possibleNumbers[index] < 1)
             continue;
@@ -73,6 +84,17 @@ int drawNextPossibleNumber()
 
         return next;
     }
+}
+
+/**
+ *  Essentially this function just do the same as contains, so it's mainly for code readability and to abstract the 'drawnNumbers' vector from other unrelated functions
+ *  
+ *  @param  int number
+ *  @return bool true if it's been drawn, false if not
+ */
+bool hasNumberBeenDrawn(int number)
+{
+    return contains(drawnNumbers, number);
 }
 
 /**
@@ -95,11 +117,22 @@ int[] createAllPossibleNumbers()
  */
 int[,] createCard()
 {
+    int[] possibleCardNumbers = createAllPossibleNumbers();
+
     int[,] card = new int[MAX_CARD_ROWS, MAX_CARD_COLUMNS];
 
     for (int i = 0; i < MAX_CARD_ROWS; i++)
         for (int j = 0; j < MAX_CARD_COLUMNS; j++)
-            card[i, j] = new Random().Next(1, 100); // TODO: values cannot repeat
+        {
+            int index = choose(possibleCardNumbers);
+
+            while (possibleCardNumbers[index] < 1)
+                index = choose(possibleCardNumbers);
+
+            card[i, j] = possibleCardNumbers[index];
+
+            possibleCardNumbers[index] = 0;
+        }
 
     return card;
 }
@@ -147,10 +180,10 @@ int getPlayerPointsByIndex(int playerIndex)
     return playersPoints[playerIndex];
 }
 
-/*
+/**
  *  Returns true if a row is filled in a card
  *  
- *  @param  int[,]  card    The card being checked
+ *  @param  int[,]  card    the card being checked
  *  @return bool            true if is filled, false if not
  */
 bool isRowFilled(int[,] card)
@@ -170,10 +203,10 @@ bool isRowFilled(int[,] card)
     return false;
 }
 
-/*
+/**
  *  Returns true if a column is filled in a card
  *  
- *  @param  int[,]  card    The card being checked
+ *  @param  int[,]  card    the card being checked
  *  @return bool            true if is filled, false if not
  */
 bool isColumnFilled(int[,] card)
@@ -193,7 +226,50 @@ bool isColumnFilled(int[,] card)
     return false;
 }
 
-// How to get player's data from index
+/**
+ * Returns true if the whole card is filled 
+ *  
+ *  @param  int[,]   card   the card being checked
+ *  @return bool            true if is filled, false if not
+ */
+bool isCardFilled(int[,] card)
+{
+    for (int i = 0; i < MAX_CARD_ROWS; i++)
+        for (int j = 0; j < MAX_CARD_COLUMNS; j++)
+            if (!contains(drawnNumbers, card[i, j]))
+                return false;
+
+    return true;
+}
+
+/**
+ *  Displays the given card
+ *  
+ *  @param int[,]   card    the card being displayed
+ */
+void displayCard(int[,] card)
+{
+    Console.WriteLine("--------------");
+
+    for (int i = 0; i < MAX_CARD_ROWS; i++)
+    {
+        for (int j = 0; j < MAX_CARD_COLUMNS; j++)
+        {
+            if (hasNumberBeenDrawn(card[i, j]))
+                Console.ForegroundColor = ConsoleColor.Red;
+
+            Console.Write(card[i, j].ToString("00") + " ");
+
+            Console.ResetColor();
+        }
+
+        Console.WriteLine();
+    }
+
+    Console.WriteLine("--------------");
+}
+
+/// How to get player's data from index
 int playerIndex = createPlayer(1);
 int playerTotalCards = playersCards[playerIndex].Length;
 int playerPoints = playersPoints[playerIndex];
@@ -232,6 +308,24 @@ drawnNumbers[7] = 20;
 drawnNumbers[8] = 15;
 drawnNumbers[9] = 8;
 
+int[,] card3 = createCard();
+
+for (int i = 0; i < MAX_CARD_ROWS; i++)
+{
+    for (int j = 0; j < MAX_CARD_COLUMNS; j++)
+    {
+        card3[i, j] = (i + 1) * (j + 1);
+        drawnNumbers[10 + ((i + 1) * (j + 1))] = (i + 1) * (j + 1);
+    }
+}
+
+Console.WriteLine("Cartela do Player 1:");
+displayCard(card);
+Console.WriteLine("\nCartela do Player 2:");
+displayCard(card2);
+Console.WriteLine("\nCartela do Player 3:");
+displayCard(card3);
+
 // Tests
 Debug.Assert(possibleNumbers.Length == 99);
 Debug.Assert(card.Length == 25);
@@ -247,3 +341,6 @@ Debug.Assert(isRowFilled(card));
 Debug.Assert(!isColumnFilled(card));
 Debug.Assert(!isRowFilled(card2));
 Debug.Assert(isColumnFilled(card2));
+Debug.Assert(isCardFilled(card3));
+Debug.Assert(!isCardFilled(card2));
+Debug.Assert(!isCardFilled(card));
