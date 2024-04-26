@@ -20,7 +20,7 @@ int[][][,] playersCards = new int[totalPlayers][][,];
 int[] playersPoints = new int[totalPlayers];
 
 /**
- *  Returns true if some value exists in a vector
+ *  Returns true if given value exists in a vector
  *  
  *  @return bool
  */
