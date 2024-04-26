@@ -85,7 +85,7 @@ int drawNextPossibleNumber()
 }
 
 /**
- *  Essentially this function just do the same as contains, so it's mainly for code readability and to abstract the 'drawnNumbers' vector from other unrelated functions
+ *  Essentially this function just does the same as contains, so it's mainly for code readability and to abstract the 'drawnNumbers' vector from other unrelated functions
  *  
  *  @param  int number
  *  @return bool true if it's been drawn, false if not
@@ -143,10 +143,10 @@ int[,] createCard()
 int createPlayer(int totalCards)
 {
     if (totalCards < 1)
-        return 0;
+        return -1;
 
     if (currentPlayerIndex >= totalPlayers)
-        return 0;
+        return -1;
 
     playersPoints[currentPlayerIndex] = 0;
 
