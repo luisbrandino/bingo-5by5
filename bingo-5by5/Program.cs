@@ -1,16 +1,15 @@
-﻿using System.Diagnostics;
-
-/// Constants
+﻿/// Constants
 int MAX_CARD_ROWS = 5;
 int MAX_CARD_COLUMNS = 5;
 int MAX_POSSIBLE_NUMBERS = 99;
 int STRAIGHT_LINE_FILLED_POINTS = 3;
 int CARD_FILLED_POINTS = 5;
+int MIN_PLAYERS = 2;
 
 bool hasRowBeenFilled = false;
 bool hasColumnBeenFilled = false;
 
-int totalPlayers = 2;
+int totalPlayers = MIN_PLAYERS;
 int currentPlayerIndex = 0;
 int[] possibleNumbers = createAllPossibleNumbers();
 int[] drawnNumbers = new int[MAX_POSSIBLE_NUMBERS];
@@ -124,6 +123,7 @@ int[,] createCard()
         {
             int index = choose(possibleCardNumbers);
 
+            /// TODO: improve the choosing number algorithm
             while (possibleCardNumbers[index] < 1)
                 index = choose(possibleCardNumbers);
 
@@ -159,6 +159,48 @@ int createPlayer(int totalCards)
 }
 
 /**
+ *  Changes the total of players 
+ *  
+ *  @param  int total   the new amount of players
+ */
+void setTotalPlayers(int total)
+{
+    if (total < MIN_PLAYERS)
+        return;
+
+    totalPlayers = total;
+    currentPlayerIndex = 0;
+}
+
+/**
+ *  Resets the game to its initial state
+ */
+void reset()
+{
+    hasColumnBeenFilled = false;
+    hasRowBeenFilled = false;
+    drawnNumbers = new int[MAX_POSSIBLE_NUMBERS];
+    currentDrawnNumbersIndex = 0;
+    possibleNumbers = createAllPossibleNumbers();
+}
+
+/**
+ *  Resets all players cards using the current quantity of players
+ */
+void resetCards()
+{
+    playersCards = new int[totalPlayers][][,];
+}
+
+/**
+ *  Resets all players points using the current quantity of players
+ */
+void resetPoints()
+{
+    playersPoints = new int[totalPlayers];
+}
+
+/**
  *  @param  int         playerIndex the position of the player to retrieve the cards
  *  @return int[][,]    the collection of cards of the given player
  */
@@ -190,7 +232,7 @@ int getPlayerPointsByIndex(int playerIndex)
  */
 void givePointsToPlayer(int playerIndex, int points)
 {
-    if (points < 0)
+    if (points < 0 || playerIndex < 0)
         return;
 
     playersPoints[playerIndex] += points;
@@ -433,6 +475,19 @@ void displayAllPlayersPoints()
 }
 
 /**
+ *  Display the points of all players at the end of the round
+ */
+void displayAllPlayersFinalPoints()
+{
+    for (int i = 0; i < totalPlayers; i++)
+    {
+        int points = getPlayerPointsByIndex(i);
+
+        Console.WriteLine($"Jogador {i + 1} acabou o jogo com {points} ponto{(points == 1 ? "" : "s")}");
+    }
+}
+
+/**
  *  Displays the current drawn numbers, if any
  */
 void displayDrawnNumbers()
@@ -472,118 +527,99 @@ void displayNotification(string message)
     Console.ResetColor();
 }
 
+/**
+ *  Gets a positive integer input from the client. It only returns a positive integer
+ *  
+ *  @param  string  message the message to be displayed when getting the client's input
+ *  @return int     the value of the client's input
+ */
+int inputPositiveInteger(string message, int? min = 0)
+{
+    Console.Write(message);
+    int value = int.Parse(Console.ReadLine());
+
+    while (value < min)
+    {
+        Console.WriteLine($"Valor tem que ser positivo e maior que {min}, tente novamente: ");
+        value = int.Parse(Console.ReadLine());
+    }
+
+    return value;
+}
+
 /// Game's main loop
-
-
-
-for (int i = 0; i < totalPlayers; i++)
-    createPlayer(2); /// 1 card for player, hardcoded for now
 
 while (true)
 {
+    int players = inputPositiveInteger("Informe a quantidade de pessoas que vão jogar: ", MIN_PLAYERS);
+
+    setTotalPlayers(players);
+    resetCards();
+    resetPoints();
+
+    for (int i = 0; i < totalPlayers; i++)
+    {
+        int totalCards = inputPositiveInteger($"Informe a quantidade de cartelas que o {i + 1} jogador terá: ");
+
+        createPlayer(totalCards);
+    }
+
+    while (true)
+    {
+        Console.Clear();
+
+        for (int i = 0; i < totalPlayers; i++)
+            displayCardsFromPlayer(i);
+
+        awardPlayersThatFilledAnyLine();
+
+        displayAllPlayersPoints();
+
+        displayDrawnNumbers();
+
+        bool[] nextWinners = verifyNextWinners();
+        int winners = 0;
+
+        for (int i = 0; i < totalPlayers; i++)
+            if (nextWinners[i])
+            {
+                awardPlayerForWinning(i);
+                winners++;
+            }
+
+        if (winners > 0)
+            break;
+
+        Console.WriteLine("\nPressione qualquer tecla para sortear o próximo número");
+        Console.ReadKey();
+
+        drawNextPossibleNumber();
+    }
+
+    displayAllPlayersFinalPoints();
+
+    Console.WriteLine("\nPressione qualquer tecla para continuar");
+    Console.ReadKey();
     Console.Clear();
 
-    for (int i = 0; i < totalPlayers; i++)
-        displayCardsFromPlayer(i);
+    Console.Write("Deseja continuar jogando? [s/n]");
+    char option = Console.ReadLine().First();
 
-    awardPlayersThatFilledAnyLine();
+    while (true)
+    {
+        bool correctOption = option == 's' || option == 'n';
 
-    displayAllPlayersPoints();
+        if (correctOption)
+            break;
 
-    displayDrawnNumbers();
+        Console.Write("Opção inválida, tente novamente: ");
+        option = Console.ReadLine().First();
+    }
 
-    bool[] nextWinners = verifyNextWinners();
-    int winners = 0;
+    Console.Clear();
 
-    for (int i = 0; i < totalPlayers; i++)
-        if (nextWinners[i])
-        {
-            awardPlayerForWinning(i);
-            winners++;
-        }
-
-    if (winners > 0)
+    if (option == 'n')
         break;
 
-    Console.WriteLine("\nPressione qualquer tecla para sortear o próximo número");
-    Console.ReadKey();
-
-    drawNextPossibleNumber();
+    reset();
 }
-
-/*
-/// How to get player's data from index
-int playerIndex = createPlayer(1);
-int playerTotalCards = playersCards[playerIndex].Length;
-int playerPoints = playersPoints[playerIndex];
-
-
- * Player:
- * points int,
- * cards int[,]
-
-
-int[,] card = createCard();
-
-card[3, 0] = 10;
-card[3, 1] = 15;
-card[3, 2] = 30;
-card[3, 3] = 16;
-card[3, 4] = 24;
-
-drawnNumbers[0] = 15;
-drawnNumbers[1] = 30;
-drawnNumbers[2] = 10;
-drawnNumbers[3] = 16;
-drawnNumbers[4] = 24;
-
-int[,] card2 = createCard();
-
-card2[0, 0] = 17;
-card2[1, 0] = 18;
-card2[2, 0] = 20;
-card2[3, 0] = 15;
-card2[4, 0] = 8;
-
-drawnNumbers[5] = 17;
-drawnNumbers[6] = 18;
-drawnNumbers[7] = 20;
-drawnNumbers[8] = 15;
-drawnNumbers[9] = 8;
-
-int[,] card3 = createCard();
-
-for (int i = 0; i < MAX_CARD_ROWS; i++)
-{
-    for (int j = 0; j < MAX_CARD_COLUMNS; j++)
-    {
-        card3[i, j] = (i + 1) * (j + 1);
-        drawnNumbers[10 + ((i + 1) * (j + 1))] = (i + 1) * (j + 1);
-    }
-}
-
-Console.WriteLine("Cartela do Player 1:");
-displayCard(card);
-Console.WriteLine("\nCartela do Player 2:");
-displayCard(card2);
-Console.WriteLine("\nCartela do Player 3:");
-displayCard(card3);
-
-// Tests
-Debug.Assert(possibleNumbers.Length == 99);
-Debug.Assert(card.Length == 25);
-Debug.Assert(playerIndex == 0);
-Debug.Assert(currentPlayerIndex == 1);
-Debug.Assert(playerTotalCards == 1);
-Debug.Assert(playerPoints == 0);
-Debug.Assert(getPlayerCardsByIndex(0).Length == 1);
-Debug.Assert(getPlayerPointsByIndex(0) == 0);
-Debug.Assert(contains(possibleNumbers, 1));
-Debug.Assert(!contains(possibleNumbers, 0));
-Debug.Assert(isRowFilled(card));
-Debug.Assert(!isColumnFilled(card));
-Debug.Assert(!isRowFilled(card2));
-Debug.Assert(isColumnFilled(card2));
-Debug.Assert(isCardFilled(card3));
-Debug.Assert(!isCardFilled(card2));
-Debug.Assert(!isCardFilled(card));*/
