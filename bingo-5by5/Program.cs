@@ -370,7 +370,7 @@ void awardPlayersThatFilledAnyLine()
  */
 void awardPlayerForWinning(int playerIndex)
 {
-    displayNotification($"\nJogador {playerIndex + 1} marcou BINGO! +{CARD_FILLED_POINTS} pontos!");
+    displayNotification($"\nBINGO! Jogador {playerIndex + 1} preencheu toda sua cartela e ganhou {CARD_FILLED_POINTS} pontos!");
 
     givePointsToPlayer(playerIndex, CARD_FILLED_POINTS);
 }
@@ -441,7 +441,7 @@ void displayDrawnNumbers()
 
     if (!hasAnyDrawnNumbers)
     {
-        Console.WriteLine("Nenhum número foi sorteado ainda.");
+        Console.WriteLine("\nNenhum número foi sorteado ainda.");
         return;
     }
 
@@ -474,14 +474,14 @@ void displayNotification(string message)
 
 /// Game's main loop
 
+
+
 for (int i = 0; i < totalPlayers; i++)
     createPlayer(2); /// 1 card for player, hardcoded for now
 
 while (true)
 {
     Console.Clear();
-
-    drawNextPossibleNumber();
 
     for (int i = 0; i < totalPlayers; i++)
         displayCardsFromPlayer(i);
@@ -505,7 +505,10 @@ while (true)
     if (winners > 0)
         break;
 
+    Console.WriteLine("\nPressione qualquer tecla para sortear o próximo número");
     Console.ReadKey();
+
+    drawNextPossibleNumber();
 }
 
 /*
