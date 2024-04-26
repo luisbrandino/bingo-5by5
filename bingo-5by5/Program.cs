@@ -144,9 +144,8 @@ int createPlayer(int totalCards)
     if (totalCards < 1)
         return 0;
 
-    /*if (currentPlayerIndex >= totalPlayers)
+    if (currentPlayerIndex >= totalPlayers)
         return 0;
-    */
 
     playersPoints[currentPlayerIndex] = 0;
 
