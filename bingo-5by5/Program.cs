@@ -5,6 +5,7 @@ int MAX_POSSIBLE_NUMBERS = 99;
 int STRAIGHT_LINE_FILLED_POINTS = 3;
 int CARD_FILLED_POINTS = 5;
 int MIN_PLAYERS = 2;
+int MIN_CARDS = 1;
 
 bool hasRowBeenFilled = false;
 bool hasColumnBeenFilled = false;
@@ -540,7 +541,7 @@ int inputPositiveInteger(string message, int? min = 0)
 
     while (value < min)
     {
-        Console.WriteLine($"Valor tem que ser positivo e maior que {min}, tente novamente: ");
+        Console.Write($"Valor tem que ser positivo e maior que {min}, tente novamente: ");
         value = int.Parse(Console.ReadLine());
     }
 
@@ -559,7 +560,7 @@ while (true)
 
     for (int i = 0; i < totalPlayers; i++)
     {
-        int totalCards = inputPositiveInteger($"Informe a quantidade de cartelas que o {i + 1} jogador terá: ");
+        int totalCards = inputPositiveInteger($"Informe a quantidade de cartelas que o {i + 1}º jogador terá: ", MIN_CARDS);
 
         createPlayer(totalCards);
     }
