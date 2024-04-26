@@ -37,7 +37,7 @@ bool contains(int[] vector, int value)
  *  Returns the index of the chosen element
  *  
  *  @param int[] vector
- *  @return int the chosen element
+ *  @return int the index of the chosen element
  */
 int choose(int[] vector)
 {
