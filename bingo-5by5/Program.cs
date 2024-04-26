@@ -530,6 +530,7 @@ void displayNotification(string message)
  *  Gets a positive integer input from the client. It only returns a positive integer
  *  
  *  @param  string  message the message to be displayed when getting the client's input
+ *  @param  min (nullable)  the minimum value to accept from the client's input
  *  @return int     the value of the client's input
  */
 int inputPositiveInteger(string message, int? min = 0)
